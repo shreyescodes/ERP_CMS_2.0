@@ -1,106 +1,266 @@
-import React from 'react'
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Card, CardContent, Typography, Grid, Box, Avatar, Container, Paper } from '@mui/material';
-import { useSelector } from 'react-redux';
+import {
+    Card,
+    CardContent,
+    Typography,
+    Grid,
+    Box,
+    Avatar,
+    Container,
+    TextField,
+    Button,
+    IconButton,
+    Snackbar,
+} from '@mui/material';
+import { Edit as EditIcon, Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateProfile } from '../../redux/userRelated/userHandle';
+import { StyledPaper } from '../../components/styles';
 
 const StudentProfile = () => {
-  const { currentUser, response, error } = useSelector((state) => state.user);
+    const dispatch = useDispatch();
+    const { currentUser, response, error } = useSelector((state) => state.user);
+    const [isEditing, setIsEditing] = useState(false);
+    const [showSnackbar, setShowSnackbar] = useState(false);
+    const [formData, setFormData] = useState({
+        name: currentUser.name,
+        rollNum: currentUser.rollNum,
+        email: currentUser.email || '',
+        phone: currentUser.phone || '',
+        address: currentUser.address || '',
+        dateOfBirth: currentUser.dateOfBirth || '',
+        gender: currentUser.gender || '',
+        emergencyContact: currentUser.emergencyContact || '',
+    });
 
-  if (response) { console.log(response) }
-  else if (error) { console.log(error) }
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
 
-  const sclassName = currentUser.sclassName
-  const studentSchool = currentUser.school
+    const handleSubmit = () => {
+        dispatch(updateProfile(currentUser._id, formData, "Student"));
+        setIsEditing(false);
+        setShowSnackbar(true);
+    };
 
-  return (
-    <>
-      <Container maxWidth="md">
-        <StyledPaper elevation={3}>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <Box display="flex" justifyContent="center">
-                <Avatar alt="Student Avatar" sx={{ width: 150, height: 150 }}>
-                  {String(currentUser.name).charAt(0)}
-                </Avatar>
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box display="flex" justifyContent="center">
-                <Typography variant="h5" component="h2" textAlign="center">
-                  {currentUser.name}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box display="flex" justifyContent="center">
-                <Typography variant="subtitle1" component="p" textAlign="center">
-                  Student Roll No: {currentUser.rollNum}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box display="flex" justifyContent="center">
-                <Typography variant="subtitle1" component="p" textAlign="center">
-                  Class: {sclassName.sclassName}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12}>
-              <Box display="flex" justifyContent="center">
-                <Typography variant="subtitle1" component="p" textAlign="center">
-                  School: {studentSchool.schoolName}
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        </StyledPaper>
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Personal Information
-            </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1" component="p">
-                  <strong>Date of Birth:</strong> January 1, 2000
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1" component="p">
-                  <strong>Gender:</strong> Male
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1" component="p">
-                  <strong>Email:</strong> john.doe@example.com
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1" component="p">
-                  <strong>Phone:</strong> (123) 456-7890
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1" component="p">
-                  <strong>Address:</strong> 123 Main Street, City, Country
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle1" component="p">
-                  <strong>Emergency Contact:</strong> (987) 654-3210
-                </Typography>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      </Container>
-    </>
-  )
-}
+    const handleCancel = () => {
+        setFormData({
+            name: currentUser.name,
+            rollNum: currentUser.rollNum,
+            email: currentUser.email || '',
+            phone: currentUser.phone || '',
+            address: currentUser.address || '',
+            dateOfBirth: currentUser.dateOfBirth || '',
+            gender: currentUser.gender || '',
+            emergencyContact: currentUser.emergencyContact || '',
+        });
+        setIsEditing(false);
+    };
 
-export default StudentProfile
+    return (
+        <>
+            <Container maxWidth="md">
+                <StyledPaper elevation={3}>
+                    <Box display="flex" justifyContent="flex-end">
+                        {!isEditing ? (
+                            <IconButton onClick={() => setIsEditing(true)} color="primary">
+                                <EditIcon />
+                            </IconButton>
+                        ) : (
+                            <Box>
+                                <IconButton onClick={handleSubmit} color="primary">
+                                    <SaveIcon />
+                                </IconButton>
+                                <IconButton onClick={handleCancel} color="error">
+                                    <CancelIcon />
+                                </IconButton>
+                            </Box>
+                        )}
+                    </Box>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <Box display="flex" justifyContent="center">
+                                <Avatar alt="Student Avatar" sx={{ width: 150, height: 150 }}>
+                                    {String(currentUser.name).charAt(0)}
+                                </Avatar>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Box display="flex" justifyContent="center">
+                                {isEditing ? (
+                                    <TextField
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        variant="outlined"
+                                        size="small"
+                                    />
+                                ) : (
+                                    <Typography variant="h5" component="h2" textAlign="center">
+                                        {currentUser.name}
+                                    </Typography>
+                                )}
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Box display="flex" justifyContent="center">
+                                {isEditing ? (
+                                    <TextField
+                                        name="rollNum"
+                                        value={formData.rollNum}
+                                        onChange={handleInputChange}
+                                        variant="outlined"
+                                        size="small"
+                                        label="Roll Number"
+                                    />
+                                ) : (
+                                    <Typography variant="subtitle1" component="p" textAlign="center">
+                                        Student Roll No: {currentUser.rollNum}
+                                    </Typography>
+                                )}
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Box display="flex" justifyContent="center">
+                                <Typography variant="subtitle1" component="p" textAlign="center">
+                                    Class: {currentUser.sclassName.sclassName}
+                                </Typography>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Box display="flex" justifyContent="center">
+                                <Typography variant="subtitle1" component="p" textAlign="center">
+                                    School: {currentUser.school.schoolName}
+                                </Typography>
+                            </Box>
+                        </Grid>
+                    </Grid>
+                </StyledPaper>
+                <Card>
+                    <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                            Personal Information
+                        </Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                {isEditing ? (
+                                    <TextField
+                                        fullWidth
+                                        name="dateOfBirth"
+                                        label="Date of Birth"
+                                        type="date"
+                                        value={formData.dateOfBirth}
+                                        onChange={handleInputChange}
+                                        InputLabelProps={{ shrink: true }}
+                                    />
+                                ) : (
+                                    <Typography variant="subtitle1" component="p">
+                                        <strong>Date of Birth:</strong> {formData.dateOfBirth || 'Not provided'}
+                                    </Typography>
+                                )}
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                {isEditing ? (
+                                    <TextField
+                                        fullWidth
+                                        name="gender"
+                                        label="Gender"
+                                        value={formData.gender}
+                                        onChange={handleInputChange}
+                                        select
+                                        SelectProps={{ native: true }}
+                                    >
+                                        <option value="">Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </TextField>
+                                ) : (
+                                    <Typography variant="subtitle1" component="p">
+                                        <strong>Gender:</strong> {formData.gender || 'Not provided'}
+                                    </Typography>
+                                )}
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                {isEditing ? (
+                                    <TextField
+                                        fullWidth
+                                        name="email"
+                                        label="Email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                    />
+                                ) : (
+                                    <Typography variant="subtitle1" component="p">
+                                        <strong>Email:</strong> {formData.email || 'Not provided'}
+                                    </Typography>
+                                )}
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                {isEditing ? (
+                                    <TextField
+                                        fullWidth
+                                        name="phone"
+                                        label="Phone"
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
+                                    />
+                                ) : (
+                                    <Typography variant="subtitle1" component="p">
+                                        <strong>Phone:</strong> {formData.phone || 'Not provided'}
+                                    </Typography>
+                                )}
+                            </Grid>
+                            <Grid item xs={12}>
+                                {isEditing ? (
+                                    <TextField
+                                        fullWidth
+                                        name="address"
+                                        label="Address"
+                                        value={formData.address}
+                                        onChange={handleInputChange}
+                                        multiline
+                                        rows={2}
+                                    />
+                                ) : (
+                                    <Typography variant="subtitle1" component="p">
+                                        <strong>Address:</strong> {formData.address || 'Not provided'}
+                                    </Typography>
+                                )}
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                {isEditing ? (
+                                    <TextField
+                                        fullWidth
+                                        name="emergencyContact"
+                                        label="Emergency Contact"
+                                        value={formData.emergencyContact}
+                                        onChange={handleInputChange}
+                                    />
+                                ) : (
+                                    <Typography variant="subtitle1" component="p">
+                                        <strong>Emergency Contact:</strong> {formData.emergencyContact || 'Not provided'}
+                                    </Typography>
+                                )}
+                            </Grid>
+                        </Grid>
+                    </CardContent>
+                </Card>
+            </Container>
+            <Snackbar
+                open={showSnackbar}
+                autoHideDuration={6000}
+                onClose={() => setShowSnackbar(false)}
+                message={error || response}
+                severity={error ? "error" : "success"}
+            />
+        </>
+    );
+};
 
-const StyledPaper = styled(Paper)`
-  padding: 20px;
-  margin-bottom: 20px;
-`;
+export default StudentProfile;

@@ -2,7 +2,9 @@ const router = require('express').Router();
 
 // const { adminRegister, adminLogIn, deleteAdmin, getAdminDetail, updateAdmin } = require('../controllers/admin-controller.js');
 
-const { adminRegister, adminLogIn, getAdminDetail} = require('../controllers/admin-controller.js');
+const { adminRegister, adminLogIn, getAdminDetail, updateAdminProfile } = require('../controllers/admin-controller.js');
+const { updateStudentProfile } = require('../controllers/student_controller.js');
+const { updateTeacherProfile } = require('../controllers/teacher-controller.js');
 
 const { sclassCreate, sclassList, deleteSclass, deleteSclasses, getSclassDetail, getSclassStudents } = require('../controllers/class-controller.js');
 const { complainCreate, complainList } = require('../controllers/complain-controller.js');
@@ -60,6 +62,11 @@ router.put('/RemoveStudentSubAtten/:id', removeStudentAttendanceBySubject);
 router.put('/RemoveStudentAtten/:id', removeStudentAttendance)
 
 router.get('/StudentAssignments/:studentId', getStudentAssignmentsCount);
+
+// Profile Update Routes
+router.put('/StudentProfile/:id', updateStudentProfile);
+router.put('/TeacherProfile/:id', updateTeacherProfile);
+router.put('/AdminProfile/:id', updateAdminProfile);
 
 // Teacher
 

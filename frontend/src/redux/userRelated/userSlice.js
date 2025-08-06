@@ -79,7 +79,22 @@ const userSlice = createSlice({
         },
         toggleDarkMode: (state) => {
             state.darkMode = !state.darkMode;
-        }
+        },
+
+        updateProfileStart: (state) => {
+            state.loading = true;
+            state.error = null;
+        },
+        updateProfileSuccess: (state, action) => {
+            state.loading = false;
+            state.currentUser = action.payload;
+            state.error = null;
+            state.response = "Profile Updated Successfully";
+        },
+        updateProfileFailure: (state, action) => {
+            state.loading = false;
+            state.error = action.payload;
+        },
     },
 });
 
@@ -96,7 +111,10 @@ export const {
     getRequest,
     getFailed,
     getError,
-    toggleDarkMode
+    toggleDarkMode,
+    updateProfileStart,
+    updateProfileSuccess,
+    updateProfileFailure,
 } = userSlice.actions;
 
 export const userReducer = userSlice.reducer;

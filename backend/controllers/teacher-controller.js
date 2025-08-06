@@ -211,6 +211,48 @@ const getTeacherStats = async (req, res) => {
     }
 };
 
+const updateTeacherProfile = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            name,
+            password,
+            dateOfBirth,
+            gender,
+            email,
+            phone,
+            address,
+            qualification
+        } = req.body;
+
+        const teacher = await Teacher.findById(id);
+        if (!teacher) {
+            return res.status(404).json({ message: "Teacher not found" });
+        }
+
+        // Only update password if provided
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            teacher.password = hashedPassword;
+        }
+
+        // Update other fields
+        teacher.name = name || teacher.name;
+        teacher.dateOfBirth = dateOfBirth || teacher.dateOfBirth;
+        teacher.gender = gender || teacher.gender;
+        teacher.email = email || teacher.email;
+        teacher.phone = phone || teacher.phone;
+        teacher.address = address || teacher.address;
+        teacher.qualification = qualification || teacher.qualification;
+
+        const updatedTeacher = await teacher.save();
+        res.status(200).json(updatedTeacher);
+    } catch (error) {
+        res.status(500).json({ message: "Error updating teacher profile", error: error.message });
+    }
+};
+
 module.exports = {
     teacherRegister,
     teacherLogIn,
@@ -221,5 +263,6 @@ module.exports = {
     deleteTeachers,
     deleteTeachersByClass,
     teacherAttendance,
-    getTeacherStats
+    getTeacherStats,
+    updateTeacherProfile
 };

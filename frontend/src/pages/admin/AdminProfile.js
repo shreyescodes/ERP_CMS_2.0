@@ -1,105 +1,191 @@
-// import React, { useState } from 'react';
-// import { KeyboardArrowDown, KeyboardArrowUp } from '@mui/icons-material'
-// import { useDispatch, useSelector } from 'react-redux';
-// import { deleteUser, updateUser } from '../../redux/userRelated/userHandle';
-// import { useNavigate } from 'react-router-dom'
-// import { authLogout } from '../../redux/userRelated/userSlice';
-// import { Button, Collapse } from '@mui/material';
-
-import { useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import styled from 'styled-components';
+import {
+    Card,
+    CardContent,
+    Typography,
+    Grid,
+    Box,
+    Avatar,
+    Container,
+    TextField,
+    IconButton,
+    Snackbar,
+} from '@mui/material';
+import { Edit as EditIcon, Save as SaveIcon, Cancel as CancelIcon } from '@mui/icons-material';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateProfile } from '../../redux/userRelated/userHandle';
+import { StyledPaper } from '../../components/styles';
 
 const AdminProfile = () => {
-    // const [showTab, setShowTab] = useState(false);
-    // const buttonText = showTab ? 'Cancel' : 'Edit profile';
+    const dispatch = useDispatch();
+    const { currentUser, response, error } = useSelector((state) => state.user);
+    const [isEditing, setIsEditing] = useState(false);
+    const [showSnackbar, setShowSnackbar] = useState(false);
+    const [formData, setFormData] = useState({
+        name: currentUser.name,
+        email: currentUser.email || '',
+        phone: currentUser.phone || '',
+        schoolName: currentUser.schoolName || '',
+        address: currentUser.address || '',
+    });
 
-    // const navigate = useNavigate()
-    // const dispatch = useDispatch();
-        const { currentUser } = useSelector((state) => state.user);
-    // const { currentUser, response, error } = useSelector((state) => state.user);
-    // const address = "Admin"
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prevState => ({
+            ...prevState,
+            [name]: value
+        }));
+    };
 
-    // if (response) { console.log(response) }
-    // else if (error) { console.log(error) }
+    const handleSubmit = () => {
+        dispatch(updateProfile(currentUser._id, formData, "Admin"));
+        setIsEditing(false);
+        setShowSnackbar(true);
+    };
 
-    // const [name, setName] = useState(currentUser.name);
-    // const [email, setEmail] = useState(currentUser.email);
-    // const [password, setPassword] = useState("");
-    // const [schoolName, setSchoolName] = useState(currentUser.schoolName);
-
-    // const fields = password === "" ? { name, email, schoolName } : { name, email, password, schoolName }
-
-    // const submitHandler = (event) => {
-    //     event.preventDefault()
-    //     dispatch(updateUser(fields, currentUser._id, address))
-    // }
-
-    // const deleteHandler = () => {
-    //     try {
-    //         dispatch(deleteUser(currentUser._id, "Students"));
-    //         dispatch(deleteUser(currentUser._id, address));
-    //         dispatch(authLogout());
-    //         navigate('/');
-    //     } catch (error) {
-    //         console.error(error);
-    //     }
-    // }
+    const handleCancel = () => {
+        setFormData({
+            name: currentUser.name,
+            email: currentUser.email || '',
+            phone: currentUser.phone || '',
+            schoolName: currentUser.schoolName || '',
+            address: currentUser.address || '',
+        });
+        setIsEditing(false);
+    };
 
     return (
-        <div>
-            Name: {currentUser.name}
-            <br />
-            Email: {currentUser.email}
-            <br />
+        <>
+            <Container maxWidth="md">
+                <StyledPaper elevation={3}>
+                    <Box display="flex" justifyContent="flex-end">
+                        {!isEditing ? (
+                            <IconButton onClick={() => setIsEditing(true)} color="primary">
+                                <EditIcon />
+                            </IconButton>
+                        ) : (
+                            <Box>
+                                <IconButton onClick={handleSubmit} color="primary">
+                                    <SaveIcon />
+                                </IconButton>
+                                <IconButton onClick={handleCancel} color="error">
+                                    <CancelIcon />
+                                </IconButton>
+                            </Box>
+                        )}
+                    </Box>
+                    <Grid container spacing={2}>
+                        <Grid item xs={12}>
+                            <Box display="flex" justifyContent="center">
+                                <Avatar alt="Admin Avatar" sx={{ width: 150, height: 150 }}>
+                                    {String(currentUser.name).charAt(0)}
+                                </Avatar>
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Box display="flex" justifyContent="center">
+                                {isEditing ? (
+                                    <TextField
+                                        name="name"
+                                        value={formData.name}
+                                        onChange={handleInputChange}
+                                        variant="outlined"
+                                        size="small"
+                                    />
+                                ) : (
+                                    <Typography variant="h5" component="h2" textAlign="center">
+                                        {currentUser.name}
+                                    </Typography>
+                                )}
+                            </Box>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Box display="flex" justifyContent="center">
+                                {isEditing ? (
+                                    <TextField
+                                        name="schoolName"
+                                        value={formData.schoolName}
+                                        onChange={handleInputChange}
+                                        variant="outlined"
+                                        size="small"
+                                        label="School Name"
+                                    />
+                                ) : (
+                                    <Typography variant="subtitle1" component="p" textAlign="center">
             School: {currentUser.schoolName}
-            <br />
-            {/* <Button variant="contained" color="error" onClick={deleteHandler}>Delete</Button> */}
-            {/* <Button variant="contained" sx={styles.showButton}
-                onClick={() => setShowTab(!showTab)}>
-                {showTab ? <KeyboardArrowUp /> : <KeyboardArrowDown />}{buttonText}
-            </Button>
-            <Collapse in={showTab} timeout="auto" unmountOnExit>
-                <div className="register">
-                    <form className="registerForm" onSubmit={submitHandler}>
-                        <span className="registerTitle">Edit Details</span>
-                        <label>Name</label>
-                        <input className="registerInput" type="text" placeholder="Enter your name..."
-                            value={name}
-                            onChange={(event) => setName(event.target.value)}
-                            autoComplete="name" required />
+                                    </Typography>
+                                )}
+                            </Box>
+                        </Grid>
+                    </Grid>
+                </StyledPaper>
+                <Card>
+                    <CardContent>
+                        <Typography variant="h6" gutterBottom>
+                            Contact Information
+                        </Typography>
+                        <Grid container spacing={2}>
+                            <Grid item xs={12} sm={6}>
+                                {isEditing ? (
+                                    <TextField
+                                        fullWidth
+                                        name="email"
+                                        label="Email"
+                                        value={formData.email}
+                                        onChange={handleInputChange}
+                                    />
+                                ) : (
+                                    <Typography variant="subtitle1" component="p">
+                                        <strong>Email:</strong> {formData.email || 'Not provided'}
+                                    </Typography>
+                                )}
+                            </Grid>
+                            <Grid item xs={12} sm={6}>
+                                {isEditing ? (
+                                    <TextField
+                                        fullWidth
+                                        name="phone"
+                                        label="Phone"
+                                        value={formData.phone}
+                                        onChange={handleInputChange}
+                                    />
+                                ) : (
+                                    <Typography variant="subtitle1" component="p">
+                                        <strong>Phone:</strong> {formData.phone || 'Not provided'}
+                                    </Typography>
+                                )}
+                            </Grid>
+                            <Grid item xs={12}>
+                                {isEditing ? (
+                                    <TextField
+                                        fullWidth
+                                        name="address"
+                                        label="Address"
+                                        value={formData.address}
+                                        onChange={handleInputChange}
+                                        multiline
+                                        rows={2}
+                                    />
+                                ) : (
+                                    <Typography variant="subtitle1" component="p">
+                                        <strong>Address:</strong> {formData.address || 'Not provided'}
+                                    </Typography>
+                                )}
+                            </Grid>
+                        </Grid>
+                    </CardContent>
+                </Card>
+            </Container>
+            <Snackbar
+                open={showSnackbar}
+                autoHideDuration={6000}
+                onClose={() => setShowSnackbar(false)}
+                message={error || response}
+                severity={error ? "error" : "success"}
+            />
+        </>
+    );
+};
 
-                        <label>School</label>
-                        <input className="registerInput" type="text" placeholder="Enter your school name..."
-                            value={schoolName}
-                            onChange={(event) => setSchoolName(event.target.value)}
-                            autoComplete="name" required />
-
-                        <label>Email</label>
-                        <input className="registerInput" type="email" placeholder="Enter your email..."
-                            value={email}
-                            onChange={(event) => setEmail(event.target.value)}
-                            autoComplete="email" required />
-
-                        <label>Password</label>
-                        <input className="registerInput" type="password" placeholder="Enter your password..."
-                            value={password}
-                            onChange={(event) => setPassword(event.target.value)}
-                            autoComplete="new-password" />
-
-                        <button className="registerButton" type="submit" >Update</button>
-                    </form>
-                </div>
-            </Collapse> */}
-        </div>
-    )
-}
-
-export default AdminProfile
-
-// const styles = {
-//     attendanceButton: {
-//         backgroundColor: "#270843",
-//         "&:hover": {
-//             backgroundColor: "#3f1068",
-//         }
-//     }
-// }
+export default AdminProfile;

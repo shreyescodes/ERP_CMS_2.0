@@ -1,4 +1,4 @@
-import { Container, Grid, Paper } from '@mui/material'
+import { Container, Grid, Typography, Box } from '@mui/material'
 import SeeNotice from '../../components/SeeNotice';
 import CountUp from 'react-countup';
 import styled from 'styled-components';
@@ -10,6 +10,7 @@ import { getClassStudents, getSubjectDetails } from '../../redux/sclassRelated/s
 import { fetchTeacherStats } from '../../redux/teacherRelated/teacherHandle';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect } from 'react';
+import { StyledPaper } from '../../components/styles';
 
 const TeacherHomePage = () => {
     const dispatch = useDispatch();
@@ -28,76 +29,77 @@ const TeacherHomePage = () => {
     }, [dispatch, subjectID, classID, currentUser._id]);
 
     const numberOfStudents = sclassStudents && sclassStudents.length;
-    const numberOfSessions = subjectDetails && subjectDetails.sessions
+    const numberOfSessions = subjectDetails && subjectDetails.sessions;
+
+    const statsData = [
+        { icon: Students, title: "Class Students", value: numberOfStudents },
+        { icon: Lessons, title: "Total Lessons", value: numberOfSessions },
+        { icon: Tests, title: "Tests Taken", value: testsCount },
+        { icon: Time, title: "Total Hours", value: totalHours, suffix: "hrs" }
+    ];
 
     return (
-        <>
-            <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-                <Grid container spacing={3}>
-                    <Grid item xs={12} md={3} lg={3}>
-                        <StyledPaper>
-                            <img src={Students} alt="Students" />
-                            <Title>
-                                Class Students
-                            </Title>
-                            <Data start={0} end={numberOfStudents} duration={2.5} />
-                        </StyledPaper>
-                    </Grid>
-                    <Grid item xs={12} md={3} lg={3}>
-                        <StyledPaper>
-                            <img src={Lessons} alt="Lessons" />
-                            <Title>
-                                Total Lessons
-                            </Title>
-                            <Data start={0} end={numberOfSessions} duration={5} />
-                        </StyledPaper>
-                    </Grid>
-                    <Grid item xs={12} md={3} lg={3}>
-                        <StyledPaper>
-                            <img src={Tests} alt="Tests" />
-                            <Title>
-                                Tests Taken
-                            </Title>
-                            <Data start={0} end={testsCount} duration={4} />
-                        </StyledPaper>
-                    </Grid>
-                    <Grid item xs={12} md={3} lg={3}>
-                        <StyledPaper>
-                            <img src={Time} alt="Time" />
-                            <Title>
-                                Total Hours
-                            </Title>
-                            <Data start={0} end={totalHours} duration={4} suffix="hrs"/>
-                        </StyledPaper>
-                    </Grid>
-                    <Grid item xs={12}>
-                        <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                            <SeeNotice />
-                        </Paper>
+        <StyledContainer>
+            <Grid container spacing={3}>
+                <Grid item xs={12} md={8}>
+                    <Grid container spacing={3}>
+                        {statsData.map((stat, index) => (
+                            <Grid item xs={12} sm={6} key={index}>
+                                <StyledPaper>
+                                    <StyledBox>
+                                        <img src={stat.icon} alt={stat.title} style={{ width: '50px', height: '50px' }} />
+                                        <StyledTypography variant="h6">
+                                            {stat.title}
+                                        </StyledTypography>
+                                        <StyledCountUp 
+                                            start={0} 
+                                            end={stat.value || 0} 
+                                            duration={2.5} 
+                                            suffix={stat.suffix || ''}
+                                        />
+                                    </StyledBox>
+                                </StyledPaper>
+                            </Grid>
+                        ))}
                     </Grid>
                 </Grid>
-            </Container>
-        </>
-    )
+                <Grid item xs={12} md={4}>
+                    <StyledPaper>
+                        <StyledTypography variant="h6" gutterBottom>
+                            Latest Notices
+                        </StyledTypography>
+                        <SeeNotice />
+                    </StyledPaper>
+                </Grid>
+            </Grid>
+        </StyledContainer>
+    );
 }
 
-const StyledPaper = styled(Paper)`
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  height: 200px;
-  justify-content: space-between;
-  align-items: center;
-  text-align: center;
+const StyledContainer = styled(Container)`
+    padding-top: 2rem;
+    padding-bottom: 2rem;
 `;
 
-const Title = styled.p`
-  font-size: 1.25rem;
+const StyledBox = styled(Box)`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 1rem;
 `;
 
-const Data = styled(CountUp)`
-  font-size: calc(1.3rem + .6vw);
-  color: green;
+const StyledTypography = styled(Typography)`
+    color: #1a237e;
+    font-weight: 600;
+    text-align: center;
 `;
 
-export default TeacherHomePage
+const StyledCountUp = styled(CountUp)`
+    font-size: 2.5rem;
+    font-weight: 600;
+    color: #2196f3;
+`;
+
+export default TeacherHomePage;

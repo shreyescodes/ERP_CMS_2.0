@@ -147,6 +147,44 @@ const getAdminDetail = async (req, res) => {
 //     }
 // }
 
+const updateAdminProfile = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            name,
+            password,
+            email,
+            phone,
+            schoolName,
+            address
+        } = req.body;
+
+        const admin = await Admin.findById(id);
+        if (!admin) {
+            return res.status(404).json({ message: "Admin not found" });
+        }
+
+        // Only update password if provided
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            admin.password = hashedPassword;
+        }
+
+        // Update other fields
+        admin.name = name || admin.name;
+        admin.email = email || admin.email;
+        admin.phone = phone || admin.phone;
+        admin.schoolName = schoolName || admin.schoolName;
+        admin.address = address || admin.address;
+
+        const updatedAdmin = await admin.save();
+        res.status(200).json(updatedAdmin);
+    } catch (error) {
+        res.status(500).json({ message: "Error updating admin profile", error: error.message });
+    }
+};
+
 // module.exports = { adminRegister, adminLogIn, getAdminDetail, deleteAdmin, updateAdmin };
 
-module.exports = { adminRegister, adminLogIn, getAdminDetail };
+module.exports = { adminRegister, adminLogIn, getAdminDetail, updateAdminProfile };

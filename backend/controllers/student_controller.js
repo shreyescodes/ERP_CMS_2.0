@@ -289,6 +289,50 @@ const getStudentAssignmentsCount = async (req, res) => {
     }
 };
 
+const updateStudentProfile = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {
+            name,
+            rollNum,
+            password,
+            dateOfBirth,
+            gender,
+            email,
+            phone,
+            address,
+            emergencyContact
+        } = req.body;
+
+        const student = await Student.findById(id);
+        if (!student) {
+            return res.status(404).json({ message: "Student not found" });
+        }
+
+        // Only update password if provided
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            student.password = hashedPassword;
+        }
+
+        // Update other fields
+        student.name = name || student.name;
+        student.rollNum = rollNum || student.rollNum;
+        student.dateOfBirth = dateOfBirth || student.dateOfBirth;
+        student.gender = gender || student.gender;
+        student.email = email || student.email;
+        student.phone = phone || student.phone;
+        student.address = address || student.address;
+        student.emergencyContact = emergencyContact || student.emergencyContact;
+
+        const updatedStudent = await student.save();
+        res.status(200).json(updatedStudent);
+    } catch (error) {
+        res.status(500).json({ message: "Error updating student profile", error: error.message });
+    }
+};
+
 module.exports = {
     studentRegister,
     studentLogIn,
@@ -306,4 +350,5 @@ module.exports = {
     removeStudentAttendanceBySubject,
     removeStudentAttendance,
     getStudentAssignmentsCount,
+    updateStudentProfile,
 };
